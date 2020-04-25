@@ -37,6 +37,8 @@ canvas { border: 1px solid black; }
 .list > div > div:nth-child(2) {
     font-weight: bold;
     text-shadow: 0px 0px 3px #444;
+    background-color: darkslategrey;
+    border-radius: 30px;
 }
 
 *{
@@ -60,4 +62,7 @@ body {
 .list > .title > div {
     font-size: 14px;
     color: #444;
+    background-color: rgba(0,0,0,0)!important;
+    text-shadow: none!important;
+    border-radius: 30px;
 }
