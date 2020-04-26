@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import moment from 'moment';
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
 import './App.css';
 
-const TODAY = 'today';
-const HOURLY = 'hourly';
-const WEEKLY = 'weekly';
-const MONTHLY = 'monthly';
+
+const DAY = 1000 * 60 * 60 * 24;
 
 function queryParams(params) {
   return Object.keys(params)
@@ -20,25 +20,6 @@ function getTempData(params) {
   })
 }
 
-function createRange(range, lastTime) {
-  const lastDate = new Date(lastTime);
-  lastDate.setMinutes(0);
-  lastDate.setSeconds(0);
-  if (range === HOURLY) {
-    return {
-      createdAt_gte: lastDate.getTime()
-    }
-  }
-  return {}
-}
-
-function z(num) {
-  if (num < 10) {
-    return `0${num}`;
-  }
-  return num;
-}
-
 function getColor(v){
   const value= v/40;
   var hue=((1-value)*120).toString(10);
@@ -46,75 +27,59 @@ function getColor(v){
 }
 
 function App() {
-  
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(20);
   const [order, setOrder] = useState('desc');
-  const [range, setRange] = useState(null);
+  const [range, setRange] = useState({
+    createdAt_gte: (new Date(moment().startOf('day'))).getTime(),
+    createdAt_lte: (new Date(moment().endOf('day'))).getTime()
+  });
   const [tempData, setTempData] = useState([]);
-  const [lastTime, setLastTime] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const formatDate = date => {
-    const dateObj = new Date(date);
-
-    return `${dateObj.getFullYear()}-${z(dateObj.getMonth() + 1)}-${z(dateObj.getDate())} ${z(dateObj.getHours())}:${z(dateObj.getMinutes())}`;
-  }
   const refreshTempData = () => {
+    setLoading(true);
     getTempData({
-      ...(range ? {} : {_page: page}),
-      ...(range ? {} : {_limit: limit}),
       _sort: 'id',
       _order: order,
-      ...(range && lastTime ? createRange(range, lastTime) : {})
+      ...range
     }).then(data => {
+      setLoading(false);
       setTempData(data.reverse().map(({createdAt, value}) => ({
-        createdAt: formatDate(createdAt),
+        createdAt: moment(createdAt).format('HH:mm'),
         value
       })));
     })
   }
 
-  const getLastTime = () => {
-    getTempData({
-      _page: 1,
-      _limit: 1,
-      _sort: 'id',
-      _order: 'desc',
-    }).then(data => {
-      setLastTime(data[0].createdAt);
-    })
-  };
-
   useEffect(() => {
-    getLastTime()
     refreshTempData()
   }, []);
 
   useEffect(() => {
     refreshTempData()
-  }, [page]);
+  }, [range]);
 
   const pagePrev = () => {
-    if (!tempData.length) {
-      return;
-    }
-    setPage(page => page+1);
+    setRange(({createdAt_gte, createdAt_lte}) => ({
+      createdAt_gte: createdAt_gte - DAY,
+      createdAt_lte: createdAt_lte - DAY
+    }))
   };
 
   const pageNext = () => {
-    if (page === 1) {
-      return;
-    }
-    setPage(page => page-1);
+    setRange(({createdAt_gte, createdAt_lte}) => ({
+      createdAt_gte: createdAt_gte + DAY,
+      createdAt_lte: createdAt_lte + DAY
+    }))
   };
 
   return (
     <div className="App">
+    <div className = "datalist">
       <div className = "pager">
-        <div onClick={pagePrev} style={(tempData.length ? {} : {color : 'grey'})} >⮜Prev</div>
-        <div onClick={pageNext} style={(page > 1 ? {} : {color : 'grey'})}>Next⮞</div>
+        <div onClick={pagePrev}>⮜Prev</div>
+        <div onClick={pageNext} >Next⮞</div>
       </div>
-      <div className = "list">
+      {loading ? <div className="loader-wrapper"><div className="loader"></div></div> :       <div className = "list">
         <div className = "title">
            <div>Measurement time</div>
            <div>Value</div>
@@ -125,6 +90,23 @@ function App() {
            <div style={{color: getColor(item.value)}} >{item.value} °C</div>
          </div> 
         )}
+      </div>}
+      </div>
+        <div className="lc">
+        <div className="lc-label">{moment(range.createdAt_gte).format('L')}</div>
+        <div className="lc-label">
+          <span><span>Min:</span> {Math.min(...(tempData.map(i => i.value)))}°C</span>
+          <span><span>Max:</span> {Math.max(...(tempData.map(i => i.value)))}°C</span>
+          <span><span>Avg:</span> {(tempData.reduce( (a, i) => a + i.value,0)/tempData.length).toFixed(2)}°C</span>
+          <span><span>Last:</span> {tempData[tempData.length-1]?.value}°C</span>
+        </div>
+          <LineChart width={600} height={300} data={tempData}>
+            <Line type="monotone" dataKey="value" stroke="#8884d8" />
+            <CartesianGrid stroke="#ccc" />
+            <XAxis dataKey="createdAt" />
+            <YAxis />
+            <Tooltip />
+          </LineChart>
       </div>
     </div>
   );
