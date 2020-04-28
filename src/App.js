@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import moment from 'moment';
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import './App.css';
 
 
@@ -100,13 +100,15 @@ function App() {
           <span><span>Avg:</span> {(tempData.reduce( (a, i) => a + i.value,0)/tempData.length).toFixed(2)}°C</span>
           <span><span>Last:</span> {tempData[tempData.length-1]?.value}°C</span>
         </div>
-          <LineChart width={600} height={300} data={tempData}>
+        <ResponsiveContainer width="80%" height="60%">
+          <LineChart  data={tempData}>
             <Line type="monotone" dataKey="value" stroke="#8884d8" />
             <CartesianGrid stroke="#ccc" />
             <XAxis dataKey="createdAt" />
-            <YAxis />
+            <YAxis domain={[-20, 40]} />
             <Tooltip />
           </LineChart>
+          </ResponsiveContainer>
       </div>
     </div>
   );

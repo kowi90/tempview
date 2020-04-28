@@ -145,6 +145,7 @@ body {
     justify-content: center;
     flex: 1;
     flex-direction: column;
+    height: 100vh;
 }
 
 .lc-label {
@@ -163,4 +164,8 @@ body {
 
 .lc-label > span > span{
     font-weight: bold;
+}
+
+.recharts-line-dots{
+  display: none!important;
 }
