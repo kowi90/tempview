@@ -25,6 +25,14 @@ function getColor(v){
   var hue=((1-value)*120).toString(10);
   return `hsl(${hue},100%,50%)`;
 }
+function minToH(min) {
+  const hval = Math.floor(min/60);
+  const mval = min - (hval * 60);
+
+  const lz = v => v > 9 ? v : `0${v}`;
+
+  return `${lz(hval)}:${lz(mval)}`
+}
 
 function App() {
   const [order, setOrder] = useState('desc');
@@ -44,7 +52,7 @@ function App() {
     }).then(data => {
       setLoading(false);
       setTempData(data.reverse().map(({createdAt, value}) => ({
-        createdAt: moment(createdAt).format('HH:mm'),
+        createdAt: moment(createdAt).format('HH:mm').split(':').map((value, index) => index === 0 ?  parseInt(value)* 60 : parseInt(value)).reduce((c,p) => p+c ,0),
         value
       })));
     })
@@ -76,8 +84,9 @@ function App() {
     <div className="App">
     <div className = "datalist">
       <div className = "pager">
-        <div onClick={pagePrev}>⮜Prev</div>
-        <div onClick={pageNext} >Next⮞</div>
+        <div onClick={pagePrev}><i class="fas fa-long-arrow-alt-left"></i></div>
+        <div onClick={refreshTempData}><i class="far fa-dot-circle"></i></div>
+        <div onClick={pageNext} ><i class="fas fa-long-arrow-alt-right"></i></div>
       </div>
       {loading ? <div className="loader-wrapper"><div className="loader"></div></div> :       <div className = "list">
         <div className = "title">
@@ -86,7 +95,7 @@ function App() {
          </div>
         {tempData.map(item => 
          <div>
-           <div>{item.createdAt}</div>
+           <div>{minToH(item.createdAt)}</div>
            <div style={{color: getColor(item.value)}} >{item.value} °C</div>
          </div> 
         )}
@@ -101,12 +110,19 @@ function App() {
           <span><span>Last:</span> {tempData[tempData.length-1]?.value}°C</span>
         </div>
         <ResponsiveContainer width="80%" height="60%">
-          <LineChart  data={tempData}>
-            <Line type="monotone" dataKey="value" stroke="#8884d8" />
+          <LineChart setRange  data={tempData}>
+            <Line connectNulls={true} dataKey="value" stroke="#8884d8" />
             <CartesianGrid stroke="#ccc" />
-            <XAxis dataKey="createdAt" />
+            <XAxis
+              ticks={new Array(24).fill(0).map((v, i) => i*60)}
+              tickFormatter={minToH}
+              type="number"
+              scale="linear"
+              allowDataOverflow={true}
+              domain={[0, 1440]}
+              dataKey="createdAt"/>
             <YAxis domain={[-20, 40]} />
-            <Tooltip />
+            <Tooltip labelFormatter={minToH}/>
           </LineChart>
           </ResponsiveContainer>
       </div>

@@ -6,16 +6,19 @@ canvas { border: 1px solid black; }
     max-width: 350px;
     overflow-y: scroll;
     max-height: 90vh;
+
 }
 .pager, .picker {
     display: flex;
     max-width: 350px;
+    padding-bottom: 10px;
 }
 
 .pager > div{
     flex: 1;
     text-align: center;
     cursor: pointer;
+    font-size: 26px;
 }
 
 .list > div {
@@ -48,8 +51,10 @@ canvas { border: 1px solid black; }
 
 }
 
+::-webkit-scrollbar {
+  display: none;
+}
 body {
-    padding: 20px;
     background-color: #fefefe;
 }
 
@@ -134,6 +139,8 @@ body {
 
 .datalist{
     min-width: 350px;
+    padding-left: 20px;
+    padding-top: 20px;
 }
 .App{
     display: flex;
