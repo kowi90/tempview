@@ -9,9 +9,24 @@ canvas { border: 1px solid black; }
 
 }
 .pager, .picker {
+  display: flex;
+  max-width: 350px;
+  height: 45px;
+  align-items: center;
+  background-color: #444;
+    color: white;
+    border-bottom: 1px solid #888;
+}
+
+.currentpage{
+    text-align: center;
+    border-bottom: 1px solid #ccc;
+    background-color: #444;
+    color: white;
+    height: 30px;
     display: flex;
-    max-width: 350px;
-    padding-bottom: 10px;
+    align-items: center;
+    justify-content: center;
 }
 
 .pager > div{
@@ -29,21 +44,25 @@ canvas { border: 1px solid black; }
 .list > div > div{
  flex: 1;
  text-align: center;
+ color: white;
 }
 
 .list > div:nth-child(2n + 1) {
-    background-color: #f5f5f5;
+  background-color: #444;
+}
+.list > div:nth-child(2n) {
+  background-color: #555;
 }
 
 .list > div > div:nth-child(1) {
     min-width: 150px;
+    border-right: 1px dashed #888;
 }
 
 .list > div > div:nth-child(2) {
     font-weight: bold;
     text-shadow: 0px 0px 3px #444;
-    background-color: darkslategrey;
-    border-radius: 30px;
+
 }
 
 *{
@@ -55,11 +74,13 @@ canvas { border: 1px solid black; }
   display: none;
 }
 body {
-    background-color: #fefefe;
+  background: #bdc3c7;  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to top, #2c3e50, #bdc3c7);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to top, #2c3e50, #bdc3c7); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */  
 }
 
 .list > .title {
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid #888;
 }
 
 .list > .title > div:nth-child(1) {
@@ -68,10 +89,9 @@ body {
 
 .list > .title > div {
     font-size: 14px;
-    color: #444;
+    color: white;
     background-color: rgba(0,0,0,0)!important;
     text-shadow: none!important;
-    border-radius: 30px;
 }
 
 .loader-wrapper {
@@ -141,6 +161,7 @@ body {
     min-width: 350px;
     padding-left: 20px;
     padding-top: 20px;
+    opacity: 0.8;
 }
 .App{
     display: flex;
@@ -156,17 +177,19 @@ body {
 }
 
 .lc-label {
-    width: 549px;
-    margin-left: 60px;
+    width: 80%;
     font-weight: bold;
     font-size: 20px;
     display: flex;
-    justify-content: space-evenly;
+    padding: 10px 25px 10px 25px;
+    background-color: white;
+    opacity: 0.6;
 }
 
 .lc-label > span {
     font-weight: normal;
     font-size: 20px;
+    margin-right: 20px;
 }
 
 .lc-label > span > span{
@@ -175,4 +198,9 @@ body {
 
 .recharts-line-dots{
   display: none!important;
+}
+
+.chartstyle {
+  background-color: rgba(255,255,255,0.85);
+  padding: 15px 50px 15px 0px;
 }

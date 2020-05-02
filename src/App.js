@@ -88,6 +88,9 @@ function App() {
         <div onClick={refreshTempData}><i class="far fa-dot-circle"></i></div>
         <div onClick={pageNext} ><i class="fas fa-long-arrow-alt-right"></i></div>
       </div>
+      <div className = "currentpage">
+      {moment(range.createdAt_gte).format('L')}
+      </div>
       {loading ? <div className="loader-wrapper"><div className="loader"></div></div> :       <div className = "list">
         <div className = "title">
            <div>Measurement time</div>
@@ -102,14 +105,13 @@ function App() {
       </div>}
       </div>
         <div className="lc">
-        <div className="lc-label">{moment(range.createdAt_gte).format('L')}</div>
         <div className="lc-label">
           <span><span>Min:</span> {Math.min(...(tempData.map(i => i.value)))}°C</span>
           <span><span>Max:</span> {Math.max(...(tempData.map(i => i.value)))}°C</span>
           <span><span>Avg:</span> {(tempData.reduce( (a, i) => a + i.value,0)/tempData.length).toFixed(2)}°C</span>
           <span><span>Last:</span> {tempData[tempData.length-1]?.value}°C</span>
         </div>
-        <ResponsiveContainer width="80%" height="60%">
+        <ResponsiveContainer width="80%" height="60%" className="chartstyle">
           <LineChart setRange  data={tempData}>
             <Line connectNulls={true} dataKey="value" stroke="#8884d8" />
             <CartesianGrid stroke="#ccc" />
