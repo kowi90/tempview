@@ -42,6 +42,8 @@ function App() {
   });
   const [tempData, setTempData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [locked, setLocked] = useState(false);
+  const [lockedTempData, setLockedTempData] = useState([]);
 
   const refreshTempData = () => {
     setLoading(true);
@@ -80,7 +82,19 @@ function App() {
     }))
   };
 
-  return (
+  const toggleLock = () => {
+    if(locked) {
+      setLockedTempData([]);
+    }
+    else {
+      setLockedTempData(tempData.map(({value, ...rest}) => ({lockedValue: value, ...rest})));
+    }
+
+    setLocked(v => !v);
+  };
+
+  const graphData = [...tempData, ...lockedTempData];
+   return (
     <div className="App">
     <div className = "datalist">
       <div className = "pager">
@@ -90,6 +104,11 @@ function App() {
       </div>
       <div className = "currentpage">
       {moment(range.createdAt_gte).format('L')}
+      </div>
+      <div className = "currentpage">
+      <button onClick={toggleLock}>
+        {locked ? 'Unlock graph' : 'Lock graph'}
+      </button>
       </div>
       {loading ? <div className="loader-wrapper"><div className="loader"></div></div> :       <div className = "list">
         <div className = "title">
@@ -112,8 +131,9 @@ function App() {
           <span><span>Last:</span> {tempData[tempData.length-1]?.value}°C</span>
         </div>
         <ResponsiveContainer width="80%" height="60%" className="chartstyle">
-          <LineChart setRange  data={tempData}>
+          <LineChart setRange  data={graphData}>
             <Line connectNulls={true} dataKey="value" stroke="#8884d8" />
+            {locked &&  <Line connectNulls={true} dataKey="lockedValue" stroke="#ff0000" />}
             <CartesianGrid stroke="#ccc" />
             <XAxis
               ticks={new Array(24).fill(0).map((v, i) => i*60)}
