@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import moment from 'moment';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import './App.css';
@@ -20,6 +20,15 @@ function getTempData(params) {
   })
 }
 
+function setTemp({id, value}) {
+  return fetch(`http://leanderdev.ddns.net:3000/tempdata/${id}`, {method: 'PATCH', headers: {
+    'Content-Type': 'application/json'
+  }, body: JSON.stringify({value})})
+  .then((response) => {
+    return response.json();
+  })
+}
+
 function getColor(v){
   const value= v/40;
   var hue=((1-value)*120).toString(10);
@@ -35,6 +44,8 @@ function minToH(min) {
 }
 
 function App() {
+
+  const inputRef = useRef();
   const [order, setOrder] = useState('desc');
   const [range, setRange] = useState({
     createdAt_gte: (new Date(moment().startOf('day'))).getTime(),
@@ -44,6 +55,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [locked, setLocked] = useState(false);
   const [lockedTempData, setLockedTempData] = useState([]);
+  const [edited, setEdited] = useState(-1);
 
   const refreshTempData = () => {
     setLoading(true);
@@ -53,9 +65,10 @@ function App() {
       ...range
     }).then(data => {
       setLoading(false);
-      setTempData(data.reverse().map(({createdAt, value}) => ({
+      setTempData(data.reverse().map(({id, createdAt, value}) => ({
         createdAt: moment(createdAt).format('HH:mm').split(':').map((value, index) => index === 0 ?  parseInt(value)* 60 : parseInt(value)).reduce((c,p) => p+c ,0),
-        value
+        value,
+        id
       })));
     })
   }
@@ -93,6 +106,22 @@ function App() {
     setLocked(v => !v);
   };
 
+  const edit = index => event => {
+    setEdited(index);
+  };
+  
+  const blur = () => {
+    setTemp({id: tempData[edited].id, value: inputRef.current.value}).then(() => {
+      refreshTempData()
+    })
+    setEdited(-1);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      blur();
+    }
+  }
   const graphData = [...tempData, ...lockedTempData];
    return (
     <div className="App">
@@ -114,11 +143,13 @@ function App() {
         <div className = "title">
            <div>Measurement time</div>
            <div>Value</div>
+           <div>Actions</div>
          </div>
-        {tempData.map(item => 
+        {tempData.map((item, index) => 
          <div>
            <div>{minToH(item.createdAt)}</div>
-           <div style={{color: getColor(item.value)}} >{item.value} °C</div>
+           <div style={{color: getColor(item.value)}} >{edited === index ?  <input type="text" ref={inputRef} onKeyDown={handleKeyDown} autoFocus onBlur={blur} defaultValue={item.value}/>: item.value} °C</div>
+           <div><span onClick={edit(index)}><i class="fas fa-edit" ></i></span></div>
          </div> 
         )}
       </div>}
@@ -132,8 +163,8 @@ function App() {
         </div>
         <ResponsiveContainer width="80%" height="60%" className="chartstyle">
           <LineChart setRange  data={graphData}>
-            <Line connectNulls={true} dataKey="value" stroke="#8884d8" />
-            {locked &&  <Line connectNulls={true} dataKey="lockedValue" stroke="#ff0000" />}
+            <Line isAnimationActive={false} connectNulls={true} dataKey="value" stroke="#8884d8" />
+            {locked &&  <Line isAnimationActive={false} connectNulls={true} dataKey="lockedValue" stroke="#ff0000" />}
             <CartesianGrid stroke="#ccc" />
             <XAxis
               ticks={new Array(24).fill(0).map((v, i) => i*60)}
