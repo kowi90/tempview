@@ -1,5 +1,7 @@
 canvas { border: 1px solid black; }
-
+html {
+  height: 100%;
+}
 .list {
     display: flex;
     flex-direction: column;

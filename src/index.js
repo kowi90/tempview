@@ -2,11 +2,24 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
+import Reports from './Reports';
+import Router from './Router';
 import * as serviceWorker from './serviceWorker';
+
+export const ROUTE_APP = 'ROUTE_APP';
+export const ROUTE_REPORTS = 'ROUTE_REPORTS';
+
+const routes = {
+  ROUTE_APP: App,
+  ROUTE_REPORTS: Reports
+};
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <Router
+      routes={routes}
+      defaultRoute={ROUTE_APP}
+    />
   </React.StrictMode>,
   document.getElementById('root')
 );

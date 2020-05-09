@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import moment from 'moment';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import {ROUTE_REPORTS} from './index';
 import './App.css';
 
 
@@ -43,7 +44,7 @@ function minToH(min) {
   return `${lz(hval)}:${lz(mval)}`
 }
 
-function App() {
+function App({setCurrentRoute}) {
 
   const inputRef = useRef();
   const [order, setOrder] = useState('desc');
@@ -135,6 +136,11 @@ function App() {
       {moment(range.createdAt_gte).format('L')}
       </div>
       <div className = "currentpage">
+      <button onClick={() => {
+        setCurrentRoute(ROUTE_REPORTS)
+      }}>
+        Go to reports
+      </button>
       <button onClick={toggleLock}>
         {locked ? 'Unlock graph' : 'Lock graph'}
       </button>
