@@ -164,7 +164,7 @@ function App({setCurrentRoute}) {
         <div className="lc-label">
           <span><span>Min:</span> {Math.min(...(tempData.map(i => i.value)))}°C</span>
           <span><span>Max:</span> {Math.max(...(tempData.map(i => i.value)))}°C</span>
-          <span><span>Avg:</span> {(tempData.reduce( (a, i) => a + i.value,0)/tempData.length).toFixed(2)}°C</span>
+          <span><span>Avg:</span> {(tempData.reduce( (a, i) => a + parseInt(i.value, 10),0)/tempData.length).toFixed(2)}°C</span>
           <span><span>Last:</span> {tempData[tempData.length-1]?.value}°C</span>
         </div>
         <ResponsiveContainer width="80%" height="60%" className="chartstyle">
