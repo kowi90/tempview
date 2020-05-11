@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import moment from 'moment';
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { ComposedChart , Area, Bar, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import './App.css';
 import { ROUTE_APP } from './index';
 
@@ -38,16 +38,32 @@ function minToH(min) {
 function Reports({setCurrentRoute}) {
 
   const [reports, setReports] = useState([]);
+  const [visible, setVisible] = useState({
+    min: true,
+    max: true,
+    avg: true,
+    diff: true
+  });
+
+  useEffect(() => {
+    getReports().then(res => {
+      setReports(Object.keys(res).map(v => ({ ...res[v], date: v, diff: (res[v].max-res[v].min).toFixed(2)})));
+  });
+  }, []);
 
   const refreshTempData = () => {
     generateReports().then(() => {
         getReports().then(res => {
-            setReports(Object.keys(res).map(v => ({ ...res[v], date: v})));
+            setReports(Object.keys(res).map(v => ({ ...res[v], date: v, diff: (res[v].max-res[v].min).toFixed(2)})));
         });
     });
   }
   const formatXAxis = (tickItem) =>{
     return moment(tickItem).format('YYYY.MM.DD.')
+    }
+
+    const toggleVisible = (item) => {
+      setVisible(({[item]: current, ...rest}) => ({...rest, [item]: !current}));
     }
    return (
     <div className="App">
@@ -80,19 +96,28 @@ function Reports({setCurrentRoute}) {
       </div>
       </div>
        {!!reports.length && <div className="lc">
+       <div className="lc-label">
+          <button onClick={() => toggleVisible('max')} >Toggle max</button>
+          <button onClick={() => toggleVisible('avg')} >Toggle avg</button>
+          <button onClick={() => toggleVisible('min')} >Toggle min</button>
+          <button onClick={() => toggleVisible('diff')} >Toggle diff</button>
+        </div>
         <ResponsiveContainer width="80%" height="60%" className="chartstyle">
-          <LineChart  setRange data={reports.map(({date, ...r}) => ({...r, date: new Date(date).getTime()}))}>
-            <Line isAnimationActive={false} connectNulls={true} dataKey="avg" stroke="#00ff00" />
-            <Line isAnimationActive={false} connectNulls={true} dataKey="min" stroke="#0000ff" />
-            <Line isAnimationActive={false} connectNulls={true} dataKey="max" stroke="#ff0000" />
+          <ComposedChart  setRange data={reports.map(({date, ...r}) => ({...r, date: new Date(date).getTime()}))}>
+            { visible.max && <Area isAnimationActive={false} connectNulls={true} dataKey="max" stroke="#ffc629" fill="#ffc629" type="monotone" fillOpacity={0.5}/>}
+            { visible.avg && <Area isAnimationActive={false} connectNulls={true} dataKey="avg" stroke="#3ce339" fill="#3ce339" type="monotone" fillOpacity={0.6}/>}
+            { visible.min && <Area isAnimationActive={false} connectNulls={true} dataKey="min" stroke="#2436bd" fill="#2436bd" type="monotone" fillOpacity={0.9}/>}
+            { visible.diff && <Bar isAnimationActive={false} dataKey="diff" fill="#000000" fillOpacity={0.5}/>}
             <CartesianGrid stroke="#ccc" />
             <XAxis
               scale="linear"
               tickFormatter={formatXAxis}
               dataKey="date"/>
-            <YAxis />
-            <Tooltip />
-          </LineChart>
+            <YAxis domain={[-20, 40]} />
+            <Tooltip 
+            labelFormatter={formatXAxis}
+            />
+          </ComposedChart>
           </ResponsiveContainer>
       </div>}
     </div>
