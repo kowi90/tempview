@@ -68,7 +68,7 @@ function App({setCurrentRoute}) {
       setLoading(false);
       setTempData(data.reverse().map(({id, createdAt, value}) => ({
         createdAt: moment(createdAt).format('HH:mm').split(':').map((value, index) => index === 0 ?  parseInt(value)* 60 : parseInt(value)).reduce((c,p) => p+c ,0),
-        value,
+        value: parseFloat(value).toFixed(2),
         id
       })));
     })
